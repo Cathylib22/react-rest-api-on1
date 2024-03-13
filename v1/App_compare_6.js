@@ -61,7 +61,7 @@ function App() {
       async function getFacts() {
         setIsLoading(true);
 
-        let query = supabase.from("posted_facts").select("*");
+        let query = supabase.from("facts").select("*");
 
         if (currentCategory !== "all")
           query = query.eq("category", currentCategory);
@@ -69,6 +69,7 @@ function App() {
         const { data: facts, error } = await query
           .order("votesInteresting", { ascending: false })
           .limit(1000);
+
         if (!error) setFacts(facts);
         else alert("There was a problem getting data");
         setIsLoading(false);
@@ -103,7 +104,7 @@ function Loader() {
 }
 
 function Header({ showForm, setShowForm }) {
-  const appTitle = "Cathy Yang";
+  const appTitle = "Today I Learned";
 
   return (
     <header className="header">
@@ -116,7 +117,7 @@ function Header({ showForm, setShowForm }) {
         className="btn btn-large btn-open"
         onClick={() => setShowForm((show) => !show)}
       >
-        {showForm ? "Close" : "Share a link"}
+        {showForm ? "Close" : "Share a fact"}
       </button>
     </header>
   );
@@ -173,7 +174,7 @@ function NewFactForm({ setFacts, setShowForm }) {
       // 3. Upload fact to Supabase and receive the new fact object
       setIsUploading(true);
       const { data: newFact, error } = await supabase
-        .from("posted_facts")
+        .from("facts")
         .insert([{ text, source, category }])
         .select();
       setIsUploading(false);
@@ -195,7 +196,7 @@ function NewFactForm({ setFacts, setShowForm }) {
     <form className="fact-form" onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Share a link with the world..."
+        placeholder="Share a fact with the world..."
         value={text}
         onChange={(e) => setText(e.target.value)}
         disabled={isUploading}
@@ -284,7 +285,7 @@ function Fact({ fact, setFacts }) {
   async function handleVote(columnName) {
     setIsUpdating(true);
     const { data: updatedFact, error } = await supabase
-      .from("posted_facts")
+      .from("facts")
       .update({ [columnName]: fact[columnName] + 1 })
       .eq("id", fact.id)
       .select();
